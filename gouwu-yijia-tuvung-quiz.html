@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生詞引導教學 · Dạy từ vựng dẫn vào bài khóa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#2B2019; --paper:#F6EEDE; --paper-shadow:#DECBA3;
+    --ink:#2B2019; --ink-soft:#7A6650;
+    --indigo:#3B3050; --indigo-soft:#6A5D82;
+    --jade:#3E7C59; --jade-dark:#2A5A40; --jade-bg:#E7F4EE;
+    --vermillion:#B23B3B; --vermillion-bg:#F7E4E2;
+    --gold:#C9932F; --gold-bg:#FBF0DA;
+    --gray:#8B8794; --card-border:#E3DFE8; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Be Vietnam Pro',sans-serif;
+    background:radial-gradient(circle at 15% 0%, rgba(201,147,47,0.08), transparent 40%),
+               radial-gradient(circle at 90% 90%, rgba(62,124,89,0.10), transparent 45%), var(--bg);
+    color:var(--paper); min-height:100vh; display:flex; justify-content:center;
+    padding:26px 14px 60px;
+  }
+  .wrap{ width:100%; max-width:700px; }
+  .zh{ font-family:'Noto Serif TC',serif; }
+  .header{ text-align:center; margin-bottom:16px; }
+  .title{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:clamp(22px,5.5vw,30px); margin:0 0 4px; text-shadow:0 2px 0 rgba(0,0,0,.35);}
+  .subtitle{ font-size:13px; color:var(--gold); font-style:italic; }
+
+  .stagebar{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:18px 0 20px; }
+  .stagebar .chip{
+    font-family:'Space Mono',monospace; font-size:10.5px; padding:5px 9px; border-radius:16px;
+    border:1px solid rgba(246,238,222,0.25); color:rgba(246,238,222,0.5); background:rgba(0,0,0,.15);
+  }
+  .stagebar .chip.active{ background:var(--gold); border-color:var(--gold); color:#2B2019; font-weight:700; }
+  .stagebar .chip.done{ background:var(--jade); border-color:var(--jade); color:#fff; }
+
+  .card{
+    background:var(--paper); color:var(--ink); border-radius:8px; padding:26px 24px;
+    box-shadow:0 18px 40px rgba(0,0,0,.45); min-height:300px; display:flex; flex-direction:column;
+  }
+  .stage-tag{ font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;}
+  .stage-title{ font-family:'Noto Serif TC',serif; font-weight:700; font-size:19px; margin:0 0 3px;}
+  .stage-vi{ font-size:12.5px; color:var(--ink-soft); font-style:italic; margin-bottom:16px;}
+
+  /* intro */
+  .intro-body{ font-size:14px; line-height:1.7; }
+  .intro-body b.zh{ font-size:16px; }
+  .start-btn, .next-btn, .check-btn{
+    font-family:'Be Vietnam Pro',sans-serif; font-weight:700; font-size:14px; padding:11px 24px;
+    border-radius:24px; background:var(--ink); color:var(--paper); border:none; cursor:pointer; margin-top:auto; align-self:flex-start;
+  }
+  .start-btn:hover, .next-btn:hover, .check-btn:hover{ background:var(--jade-dark); }
+  .next-btn{ opacity:0; transform:translateY(6px); transition:opacity .2s,transform .2s; pointer-events:none;}
+  .next-btn.show{ opacity:1; transform:translateY(0); pointer-events:auto;}
+
+  /* categorize */
+  .cat-word-box{ text-align:center; padding:22px 10px 14px; }
+  .cat-word{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:40px; color:var(--indigo); }
+  .cat-def{ font-size:13.5px; color:var(--ink-soft); margin-top:8px; max-width:480px; margin-left:auto; margin-right:auto; }
+  .cat-progress{ font-family:'Space Mono',monospace; font-size:11px; color:var(--gray); text-align:center; margin-bottom:6px;}
+  .cat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .cat-btn{
+    font-family:'Noto Serif TC',serif; font-weight:700; font-size:14.5px; padding:12px 10px; border-radius:8px;
+    border:2px solid var(--indigo-soft); background:transparent; color:var(--indigo); cursor:pointer;
+    transition:transform .1s, background .15s;
+  }
+  .cat-btn:hover:not(:disabled){ transform:translateY(-1px); background:rgba(59,48,80,.06); }
+  .cat-btn.correct{ background:var(--jade); border-color:var(--jade-dark); color:#fff; }
+  .cat-btn.wrong{ background:var(--vermillion); border-color:#7c2323; color:#fff; }
+  .cat-feedback{ min-height:20px; font-size:13px; font-weight:600; text-align:center; margin-top:12px;}
+  .cat-feedback.good{ color:var(--jade-dark); }
+  .cat-feedback.bad{ color:var(--vermillion); }
+
+  /* mc */
+  .mc-word-box{ text-align:center; padding:20px 10px 8px; }
+  .mc-word{ font-family:'Noto Serif TC',serif; font-weight:900; font-size:36px; color:var(--indigo); }
+  .mc-prompt{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+  .mc-opts{ display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  .mc-opt{
+    font-family:'Noto Serif TC',serif; font-size:14.5px; text-align:left; padding:12px 14px; border-radius:8px;
+    border:2px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer;
+  }
+  .mc-opt:hover:not(:disabled){ background:rgba(43,32,25,.06); }
+  .mc-opt.correct{ background:var(--jade); border-color:var(--jade-dark); color:#fff; }
+  .mc-opt.wrong{ background:var(--vermillion); border-color:#7c2323; color:#fff; }
+  .mc-opt.dim{ opacity:.4; }
+
+  /* cloze */
+  .dialogue-box{ background:var(--white); border:1px solid var(--card-border); border-radius:6px; padding:16px 16px; margin-bottom:16px; font-size:13.5px; line-height:2; }
+  .dialogue-box .sp{ font-weight:700; color:var(--indigo-soft); }
+  .blank-mark{ display:inline-block; min-width:34px; text-align:center; border-bottom:2.5px solid var(--gold); color:var(--gold); font-weight:700; }
+  .blank-mark.filled{ color:var(--jade-dark); border-color:var(--jade); }
+  .blank-mark.wrongfill{ color:var(--vermillion); border-color:var(--vermillion); }
+  .blank-list{ display:flex; flex-direction:column; gap:10px; }
+  .blank-row{ background:var(--white); border:1px solid var(--card-border); border-radius:6px; padding:10px 12px; }
+  .blank-row .num{ font-family:'Space Mono',monospace; font-weight:700; color:var(--gold); font-size:12.5px; margin-right:6px;}
+  .blank-opts{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .blank-opt{
+    font-family:'Noto Serif TC',serif; font-size:13.5px; padding:6px 12px; border-radius:16px;
+    border:1.5px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer;
+  }
+  .blank-opt:hover:not(:disabled){ background:rgba(43,32,25,.06); }
+  .blank-opt.correct{ background:var(--jade); border-color:var(--jade-dark); color:#fff; }
+  .blank-opt.wrong{ background:var(--vermillion); border-color:#7c2323; color:#fff; }
+  .blank-opt.dim{ opacity:.35; }
+
+  /* dialogue MCQ (final) */
+  .diag-prompt{ font-family:'Noto Serif TC',serif; font-size:19px; font-weight:700; margin-bottom:4px; }
+  .diag-vi{ font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; }
+  .diag-opt{
+    font-family:'Be Vietnam Pro',sans-serif; font-weight:600; font-size:14px; padding:12px 12px; border-radius:8px;
+    border:2px solid var(--ink); background:transparent; color:var(--ink); cursor:pointer; text-align:left; margin-bottom:9px;
+  }
+  .diag-opt .zh{ font-family:'Noto Serif TC',serif; font-size:16px; display:block; }
+  .diag-opt .vi{ font-size:12px; color:var(--ink-soft); font-style:italic; display:block; margin-top:2px;}
+  .diag-opt:hover:not(:disabled){ background:rgba(43,32,25,.06); }
+  .diag-opt.correct{ background:var(--jade); border-color:var(--jade-dark); color:#fff; }
+  .diag-opt.correct .vi{ color:rgba(255,255,255,.85); }
+  .diag-opt.wrong{ background:var(--vermillion); border-color:#7c2323; color:#fff; }
+  .diag-opt.wrong .vi{ color:rgba(255,255,255,.85); }
+  .diag-opt.dim{ opacity:.4; }
+
+  .score-tag{ font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-soft); margin-top:14px; }
+  .score-tag b{ color:var(--gold); }
+
+  .receipt{ background:var(--white); border:1px solid var(--card-border); border-radius:6px; padding:24px 22px; font-family:'Space Mono',monospace; font-size:13.5px; }
+  .receipt h2{ font-family:'Noto Serif TC',serif; text-align:center; margin:0 0 14px; font-size:20px; }
+  .receipt .row{ display:flex; justify-content:space-between; margin:6px 0; }
+  .receipt .dash{ border-top:1px dashed var(--ink-soft); margin:10px 0; }
+  .stamp{ display:block; width:fit-content; margin:16px auto 0; border:3px solid var(--jade); color:var(--jade-dark); font-family:'Noto Serif TC',serif; font-weight:900; font-size:19px; padding:6px 18px; border-radius:6px; transform:rotate(-5deg); }
+
+  @media (max-width:460px){ .cat-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="title zh">生詞引導教學：咖啡店 x 手機店</div>
+    <div class="subtitle">Dạy từ vựng dẫn vào bài khóa — HSK 4–5</div>
+  </div>
+  <div class="stagebar" id="stagebar"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+
+const CATS1 = ["金錢／數字","人物","飲食物品","量詞","動作","大小","服務用語"];
+const ITEMS1 = [
+  {word:"一共", def:"加起來的總數，例如「全部多少錢」", cat:"金錢／數字"},
+  {word:"多少", def:"用來問數量或價錢的疑問詞", cat:"金錢／數字"},
+  {word:"錢", def:"買東西用的東西，例如塊、元", cat:"金錢／數字"},
+  {word:"百", def:"十個十", cat:"金錢／數字"},
+  {word:"塊", def:"錢的量詞，也叫「元」", cat:"金錢／數字"},
+  {word:"老闆", def:"開店、管理生意的人", cat:"人物"},
+  {word:"熱", def:"溫度高，剛煮好的（跟「冰」相反）", cat:"飲食物品"},
+  {word:"包子", def:"裡面有肉或菜、外面是麵皮的食物", cat:"飲食物品"},
+  {word:"杯", def:"裝飲料的容器，也是量詞", cat:"量詞"},
+  {word:"買", def:"用錢換東西", cat:"動作"},
+  {word:"要", def:"想得到某個東西", cat:"動作"},
+  {word:"幫", def:"替別人做事", cat:"動作"},
+  {word:"微波", def:"用微波爐把食物加熱", cat:"動作"},
+  {word:"大", def:"尺寸不小", cat:"大小"},
+  {word:"中", def:"不大也不小，中間的大小", cat:"大小"},
+  {word:"小", def:"尺寸不大", cat:"大小"},
+  {word:"好的", def:"表示同意、答應", cat:"服務用語"},
+  {word:"外帶", def:"買了帶走，不在店裡吃", cat:"服務用語"},
+  {word:"內用", def:"在店裡吃，不帶走", cat:"服務用語"},
+];
+
+const CATS2 = ["物品","量詞／指示","性質狀態","動作","數字","語氣／疑問"];
+const ITEMS2 = [
+  {word:"手機", def:"可以打電話、上網的行動電話", cat:"物品"},
+  {word:"支", def:"手機、筆等細長物品的量詞", cat:"量詞／指示"},
+  {word:"種", def:"表示類型、種類的量詞", cat:"量詞／指示"},
+  {word:"那", def:"指比較遠的東西（跟「這」相反）", cat:"量詞／指示"},
+  {word:"新", def:"剛做好、沒用過的（跟「舊」相反）", cat:"性質狀態"},
+  {word:"舊", def:"用很久了，不是新的", cat:"性質狀態"},
+  {word:"貴", def:"價錢很高", cat:"性質狀態"},
+  {word:"便宜", def:"價錢不高", cat:"性質狀態"},
+  {word:"能", def:"有能力做某件事", cat:"動作"},
+  {word:"上網", def:"用手機或電腦連接網路", cat:"動作"},
+  {word:"賣", def:"把東西給別人換錢（跟「買」相反）", cat:"動作"},
+  {word:"要", def:"需要、必須", cat:"動作"},
+  {word:"萬", def:"十個千", cat:"數字"},
+  {word:"千", def:"十個百", cat:"數字"},
+  {word:"了", def:"放在句尾，表示狀態改變或完成", cat:"語氣／疑問"},
+  {word:"太", def:"表示程度很高，常有負面意思", cat:"語氣／疑問"},
+  {word:"為什麼", def:"用來問原因的疑問詞", cat:"語氣／疑問"},
+];
+
+const MC1 = [
+  {word:"老闆", opts:["開店、管理生意的人","買東西的客人","幫忙的路人"], answer:0},
+  {word:"一共", opts:["只要一半","加起來的總數","每天都要"], answer:1},
+  {word:"微波", opts:["用水煮東西","用手拿東西","用微波爐把食物加熱"], answer:2},
+  {word:"外帶", opts:["在店裡坐著吃","買了帶走，不在店裡吃","免費贈送"], answer:1},
+  {word:"內用", opts:["帶回家吃","送到別的地方","在店裡吃，不帶走"], answer:2},
+  {word:"塊", opts:["很大的量詞","時間的量詞","錢的量詞，也叫「元」"], answer:2},
+  {word:"幫", opts:["自己一個人做","替別人做事","拒絕別人"], answer:1},
+  {word:"包子", opts:["一種喝的飲料","裡面有肉或菜、外面是麵皮的食物","一種水果"], answer:1},
+  {word:"杯", opts:["裝食物的大盤子","裝飲料的容器，也是量詞","一種點心"], answer:1},
+  {word:"好的", opts:["表示拒絕","表示懷疑","表示同意、答應"], answer:2},
+];
+
+const MC2 = [
+  {word:"手機", opts:["家裡用的電話","可以打電話、上網的行動電話","電腦螢幕"], answer:1},
+  {word:"舊", opts:["剛做好、沒用過的","用很久了，不是新的","很貴的"], answer:1},
+  {word:"貴", opts:["價錢很高","價錢很低","沒有價錢"], answer:0},
+  {word:"便宜", opts:["價錢很高","價錢不高","賣完了"], answer:1},
+  {word:"上網", opts:["用電話打給朋友","拍照片","用手機或電腦連接網路"], answer:2},
+  {word:"賣", opts:["用錢換東西","把東西給別人換錢","借東西給別人"], answer:1},
+  {word:"種", opts:["表示地方的量詞","表示時間的量詞","表示類型、種類的量詞"], answer:2},
+  {word:"為什麼", opts:["用來問地方的疑問詞","用來問時間的疑問詞","用來問原因的疑問詞"], answer:2},
+];
+
+function seg(text){ return {blank:false, text}; }
+function blank(answer, opts){ return {blank:true, answer, opts}; }
+
+const CLOZE1 = {
+  title:"聽力填空：咖啡店點餐", vi:"Dùng từ vừa học để hoàn thành hội thoại 1",
+  lines:[
+    {sp:"老闆", parts:[seg("請問你要買"), blank("什麼", ["什麼","誰","哪裡"]), seg("？")]},
+    {sp:"明華", parts:[blank("一杯", ["一杯","兩杯","三杯"]), seg("熱咖啡。"), blank("兩個", ["兩個","一個","三個"]), seg("包子。")]},
+    {sp:"老闆", parts:[seg("你要"), blank("大杯", ["大杯","中杯","小杯"]), seg("、中杯還是"), blank("小杯", ["小杯","大杯","中杯"]), seg("？")]},
+    {sp:"明華", parts:[blank("大杯", ["大杯","中杯","小杯"]), seg("。包子請幫我"), blank("微波", ["微波","加熱","冰"]), seg("。")]},
+    {sp:"老闆", parts:[seg("好的。請問"), blank("外帶", ["外帶","內用","好的"]), seg("還是"), blank("內用", ["內用","外帶","好的"]), seg("？")]},
+    {sp:"明華", parts:[seg("外帶，"), blank("一共", ["一共","多少","大概"]), seg("多少錢？")]},
+    {sp:"老闆", parts:[seg("咖啡"), blank("八十", ["八十","六十","九十"]), seg("，包子"), blank("四十", ["四十","三十","五十"]), seg("，一共"), blank("一百二十", ["一百二十","一百","一百五十"]), seg("塊。")]},
+  ]
+};
+
+const CLOZE2 = {
+  title:"聽力填空：買手機議價", vi:"Dùng từ vừa học để hoàn thành hội thoại 2",
+  lines:[
+    {sp:"月美", parts:[seg("我想買"), blank("一支", ["一支","兩支","三支"]), seg("新手機。")]},
+    {sp:"明華", parts:[seg("妳的手機很好，為什麼要買"), blank("新", ["新","舊","貴"]), seg("的？")]},
+    {sp:"月美", parts:[seg("我這支手機太"), blank("舊", ["舊","新","貴"]), seg("了，不好看。")]},
+    {sp:"明華", parts:[seg("妳想買哪"), blank("種", ["種","支","個"]), seg("手機？")]},
+    {sp:"月美", parts:[seg("能"), blank("照相", ["照相","上網","打電話"]), seg("也能"), blank("上網", ["上網","照相","打字"]), seg("。")]},
+    {sp:"明華", parts:[seg("那種手機很好，我哥哥有一"), blank("支", ["支","種","個"]), seg("。")]},
+    {sp:"月美", parts:[seg("貴不貴？一支賣多少"), blank("錢", ["錢","元","萬"]), seg("？")]},
+    {sp:"明華", parts:[seg("那種手機不"), blank("便宜", ["便宜","貴","新"]), seg("。一支要"), blank("一萬五千", ["一萬五千","一千五百","五千"]), seg("多。")]},
+  ]
+};
+
+const DIALOGUE_MC = [
+  { prompt:"老闆：「請問你要買什麼？」", vi:"Bạn (khách) sẽ trả lời gì?", opts:[
+      {zh:"一杯熱咖啡，兩個包子。", vi:"Một ly cà phê nóng, hai cái bánh bao.", correct:true},
+      {zh:"貴不貴？", vi:"Có đắt không?", correct:false},
+      {zh:"能照相也能上網。", vi:"Chụp ảnh được, lên mạng cũng được.", correct:false},
+    ]},
+  { prompt:"明華：「妳的手機很好，為什麼要買新的？」", vi:"月美 sẽ trả lời gì?", opts:[
+      {zh:"我這支手機太舊了，不好看。", vi:"Điện thoại này của tôi cũ quá, không đẹp.", correct:true},
+      {zh:"咖啡八十，包子四十。", vi:"Cà phê 80, bánh bao 40.", correct:false},
+      {zh:"請問外帶還是內用？", vi:"Anh/chị dùng mang đi hay tại chỗ?", correct:false},
+    ]},
+  { prompt:"月美：「一支賣多少錢？」", vi:"明華 sẽ trả lời gì?", opts:[
+      {zh:"一支要一萬五千多。", vi:"Một chiếc khoảng hơn 15 nghìn.", correct:true},
+      {zh:"外帶，一共多少錢？", vi:"Mang đi, tổng cộng bao nhiêu tiền?", correct:false},
+      {zh:"你要大杯還是小杯？", vi:"Bạn muốn ly lớn hay ly nhỏ?", correct:false},
+    ]},
+];
+
+/* ================= STAGE DEFINITIONS ================= */
+const STAGES = [
+  { key:"intro", label:"說明" },
+  { key:"cat", label:"生詞一．分類", data:{cats:CATS1, items:shuffle(ITEMS1), title:"生詞一：語意分類", vi:"Đọc định nghĩa, chọn đúng nhóm nghĩa cho từng từ (從咖啡店對話)"} },
+  { key:"mc", label:"生詞一．選擇", data:{items:shuffle(MC1), title:"生詞一：選出正確定義", vi:"Xem chữ Hán, chọn đúng định nghĩa tiếng Trung"} },
+  { key:"cloze", label:"填空①", data:CLOZE1 },
+  { key:"cat", label:"生詞二．分類", data:{cats:CATS2, items:shuffle(ITEMS2), title:"生詞二：語意分類", vi:"Đọc định nghĩa, chọn đúng nhóm nghĩa cho từng từ (從買手機對話)"} },
+  { key:"mc", label:"生詞二．選擇", data:{items:shuffle(MC2), title:"生詞二：選出正確定義", vi:"Xem chữ Hán, chọn đúng định nghĩa tiếng Trung"} },
+  { key:"cloze", label:"填空②", data:CLOZE2 },
+  { key:"dialogue", label:"對話理解", data:{items:DIALOGUE_MC, title:"對話理解：選出正確回應", vi:"Chọn câu trả lời đúng dựa trên 2 bài hội thoại gốc"} },
+  { key:"end", label:"完成" },
+];
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let stageIdx = 0;
+let subIdx = 0;
+let totalCorrect = 0, totalAnswered = 0;
+let stageStats = STAGES.map(()=>({correct:0,count:0}));
+
+const cardEl = document.getElementById('card');
+const stagebarEl = document.getElementById('stagebar');
+
+function renderStagebar(){
+  stagebarEl.innerHTML = '';
+  STAGES.forEach((s,i)=>{
+    if(s.key==='intro'||s.key==='end') return;
+    const c = document.createElement('div');
+    c.className = 'chip' + (i===stageIdx?' active':'') + (i<stageIdx?' done':'');
+    c.textContent = s.label;
+    stagebarEl.appendChild(c);
+  });
+}
+
+function goStage(i){ stageIdx = i; subIdx = 0; render(); }
+function nextSub(){
+  const s = STAGES[stageIdx];
+  const len = s.data && s.data.items ? s.data.items.length : (s.data && s.data.lines ? 1 : 1);
+  if(subIdx < len - 1){ subIdx++; render(); }
+  else { goStage(stageIdx+1); }
+}
+
+function render(){
+  renderStagebar();
+  const s = STAGES[stageIdx];
+  if(s.key === 'intro') renderIntro();
+  else if(s.key === 'cat') renderCategorize(s);
+  else if(s.key === 'mc') renderMC(s);
+  else if(s.key === 'cloze') renderCloze(s);
+  else if(s.key === 'dialogue') renderDialogue(s);
+  else if(s.key === 'end') renderEnd();
+}
+
+function renderIntro(){
+  cardEl.innerHTML = `
+    <div class="stage-tag">開始 · Bắt đầu</div>
+    <div class="stage-title zh">課前引導教學</div>
+    <div class="stage-vi">Hướng dẫn sử dụng</div>
+    <div class="intro-body">
+      <p>這個活動會先帶你認識<b class="zh">生詞一</b>和<b class="zh">生詞二</b>的所有詞彙，再用這些詞完成兩篇對話的填空與理解練習。</p>
+      <p style="margin-top:10px;">流程／Trình tự：</p>
+      <p class="zh" style="margin:4px 0;">① 生詞一分類　② 生詞一選擇定義　③ 對話一填空<br>④ 生詞二分類　⑤ 生詞二選擇定義　⑥ 對話二填空　⑦ 對話理解</p>
+      <p style="margin-top:10px; font-style:italic; color:var(--ink-soft);">Lưu ý: mọi lựa chọn trong phần 1–6 chỉ hiện bằng tiếng Trung — hãy dựa vào nghĩa và ngữ cảnh, không có bản dịch để "mách" đáp án.</p>
+    </div>
+    <button class="start-btn" id="startBtn">開始 Bắt đầu →</button>
+  `;
+  document.getElementById('startBtn').onclick = ()=> goStage(1);
+}
+
+function renderCategorize(s){
+  const item = s.data.items[subIdx];
+  cardEl.innerHTML = `
+    <div class="stage-tag">${s.data.vi}</div>
+    <div class="stage-title zh">${s.data.title}</div>
+    <div class="cat-progress">${subIdx+1} / ${s.data.items.length}</div>
+    <div class="cat-word-box">
+      <div class="cat-word zh">${item.word}</div>
+      <div class="cat-def zh">${item.def}</div>
+    </div>
+    <div class="cat-grid" id="catGrid">
+      ${s.data.cats.map(c=>`<button class="cat-btn zh" data-cat="${c}">${c}</button>`).join('')}
+    </div>
+    <div class="cat-feedback" id="catFb"></div>
+    <div class="score-tag">得分 Điểm: <b>${totalCorrect}</b> / ${totalAnswered}</div>
+  `;
+  const btns = cardEl.querySelectorAll('.cat-btn');
+  btns.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      btns.forEach(x=>x.disabled=true);
+      const chosen = b.dataset.cat;
+      const ok = chosen === item.cat;
+      totalAnswered++; stageStats[stageIdx].count++;
+      if(ok){ totalCorrect++; stageStats[stageIdx].correct++; b.classList.add('correct'); }
+      else{
+        b.classList.add('wrong');
+        btns.forEach(x=>{ if(x.dataset.cat===item.cat) x.classList.add('correct'); });
+      }
+      const fb = document.getElementById('catFb');
+      fb.textContent = ok ? '✓ 對了！Chính xác!' : `✗ 正確答案：${item.cat}`;
+      fb.className = 'cat-feedback ' + (ok?'good':'bad');
+      setTimeout(nextSub, ok ? 550 : 1300);
+    });
+  });
+}
+
+function renderMC(s){
+  const item = s.data.items[subIdx];
+  cardEl.innerHTML = `
+    <div class="stage-tag">${s.data.vi}</div>
+    <div class="stage-title zh">${s.data.title}</div>
+    <div class="cat-progress">${subIdx+1} / ${s.data.items.length}</div>
+    <div class="mc-word-box">
+      <div class="mc-word zh">${item.word}</div>
+      <div class="mc-prompt">這個詞的意思是？</div>
+    </div>
+    <div class="mc-opts" id="mcOpts">
+      ${item.opts.map((o,i)=>`<button class="mc-opt zh" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="score-tag">得分 Điểm: <b>${totalCorrect}</b> / ${totalAnswered}</div>
+  `;
+  const btns = cardEl.querySelectorAll('.mc-opt');
+  btns.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      btns.forEach(x=>x.disabled=true);
+      const i = parseInt(b.dataset.i,10);
+      const ok = i === item.answer;
+      totalAnswered++; stageStats[stageIdx].count++;
+      if(ok){ totalCorrect++; stageStats[stageIdx].correct++; b.classList.add('correct'); }
+      else{
+        b.classList.add('wrong');
+        btns.forEach(x=>{ if(parseInt(x.dataset.i,10)===item.answer) x.classList.add('correct'); else x.classList.add('dim'); });
+      }
+      setTimeout(nextSub, ok ? 550 : 1300);
+    });
+  });
+}
+
+function renderCloze(s){
+  const data = s.data;
+  let blankCounter = 0;
+  const blankRefs = [];
+
+  const dialogueHtml = data.lines.map(line=>{
+    const partsHtml = line.parts.map(p=>{
+      if(!p.blank) return `<span>${p.text}</span>`;
+      blankCounter++;
+      const id = 'b' + blankCounter;
+      blankRefs.push({id, answer:p.answer, opts:p.opts});
+      return `<span class="blank-mark" id="mark-${id}">${blankCounter}</span>`;
+    }).join('');
+    return `<div><span class="sp zh">${line.sp}</span><span class="zh">：${partsHtml}</span></div>`;
+  }).join('');
+
+  const listHtml = blankRefs.map((b,idx)=>`
+    <div class="blank-row">
+      <span class="num">第 ${idx+1} 格</span>
+      <div class="blank-opts" id="opts-${b.id}">
+        ${b.opts.map(o=>`<button class="blank-opt zh" data-word="${o}">${o}</button>`).join('')}
+      </div>
+    </div>`).join('');
+
+  cardEl.innerHTML = `
+    <div class="stage-tag">${data.vi}</div>
+    <div class="stage-title zh">${data.title}</div>
+    <div class="dialogue-box zh">${dialogueHtml}</div>
+    <div class="blank-list">${listHtml}</div>
+    <div class="score-tag" id="clozeScore">已完成 0 / ${blankRefs.length}</div>
+    <button class="next-btn" id="clozeNext">下一關 →</button>
+  `;
+
+  let filled = 0;
+  blankRefs.forEach(b=>{
+    const container = document.getElementById('opts-' + b.id);
+    const buttons = container.querySelectorAll('.blank-opt');
+    buttons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        buttons.forEach(x=>x.disabled=true);
+        const word = btn.dataset.word;
+        const ok = word === b.answer;
+        const mark = document.getElementById('mark-' + b.id);
+        totalAnswered++; stageStats[stageIdx].count++;
+        if(ok){
+          totalCorrect++; stageStats[stageIdx].correct++;
+          btn.classList.add('correct');
+          mark.textContent = word;
+          mark.classList.add('filled');
+        } else {
+          btn.classList.add('wrong');
+          buttons.forEach(x=>{ if(x.dataset.word===b.answer) x.classList.add('correct'); });
+          mark.textContent = b.answer;
+          mark.classList.add('wrongfill');
+        }
+        filled++;
+        document.getElementById('clozeScore').textContent = `已完成 ${filled} / ${blankRefs.length}`;
+        if(filled === blankRefs.length){
+          const nb = document.getElementById('clozeNext');
+          nb.classList.add('show');
+          nb.addEventListener('click', ()=> goStage(stageIdx+1));
+        }
+      });
+    });
+  });
+}
+
+function renderDialogue(s){
+  const item = s.data.items[subIdx];
+  cardEl.innerHTML = `
+    <div class="stage-tag">${s.data.vi}</div>
+    <div class="stage-title zh">${s.data.title}</div>
+    <div class="cat-progress">${subIdx+1} / ${s.data.items.length}</div>
+    <div class="diag-prompt zh">${item.prompt}</div>
+    <div class="diag-vi">${''}</div>
+    <div id="diagOpts">
+      ${item.opts.map((o,i)=>`
+        <button class="diag-opt" data-i="${i}">
+          <span class="zh">${o.zh}</span>
+          <span class="vi">${o.vi}</span>
+        </button>`).join('')}
+    </div>
+    <div class="score-tag">得分 Điểm: <b>${totalCorrect}</b> / ${totalAnswered}</div>
+  `;
+  const btns = cardEl.querySelectorAll('.diag-opt');
+  btns.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      btns.forEach(x=>x.disabled=true);
+      const i = parseInt(b.dataset.i,10);
+      const ok = item.opts[i].correct;
+      totalAnswered++; stageStats[stageIdx].count++;
+      if(ok){ totalCorrect++; stageStats[stageIdx].correct++; b.classList.add('correct'); }
+      else{
+        b.classList.add('wrong');
+        btns.forEach(x=>{ const xi=parseInt(x.dataset.i,10); if(item.opts[xi].correct) x.classList.add('correct'); else x.classList.add('dim'); });
+      }
+      setTimeout(nextSub, ok ? 550 : 1300);
+    });
+  });
+}
+
+function renderEnd(){
+  const pct = totalAnswered ? Math.round((totalCorrect/totalAnswered)*100) : 0;
+  cardEl.innerHTML = `
+    <div class="receipt">
+      <h2 class="zh">學習成果 收據</h2>
+      <div class="row"><span>總正確率 Tỉ lệ đúng</span><span><b>${pct}%</b></span></div>
+      <div class="dash"></div>
+      <div class="row"><span>總答對 Số câu đúng</span><span>${totalCorrect} / ${totalAnswered}</span></div>
+      <div class="dash"></div>
+      <div style="font-size:12.5px; color:var(--ink-soft);">建議：正確率低於 70% 的關卡可讓老師重新帶讀生詞卡，再進行一次分類與填空練習。</div>
+      <div class="stamp zh">完成 Hoàn thành</div>
+    </div>
+    <button class="start-btn" id="restartBtn" style="margin-top:16px;">🔄 重新開始 Làm lại</button>
+  `;
+  document.getElementById('restartBtn').onclick = ()=>{
+    totalCorrect=0; totalAnswered=0;
+    stageStats = STAGES.map(()=>({correct:0,count:0}));
+    STAGES[1].data.items = shuffle(ITEMS1);
+    STAGES[2].data.items = shuffle(MC1);
+    STAGES[4].data.items = shuffle(ITEMS2);
+    STAGES[5].data.items = shuffle(MC2);
+    goStage(0);
+  };
+}
+
+render();
+</script>
+</body>
+</html>
