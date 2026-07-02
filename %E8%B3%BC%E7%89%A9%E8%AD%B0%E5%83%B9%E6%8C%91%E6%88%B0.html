@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>購物議價大挑戰 · Thử thách mua sắm & mặc cả</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#2B2019;
+    --bg2:#1D1510;
+    --paper:#F6EEDE;
+    --paper-shadow:#DECBA3;
+    --ink:#2B2019;
+    --ink-soft:#7A6650;
+    --jade:#3E7C59;
+    --jade-dark:#2A5A40;
+    --vermillion:#B23B3B;
+    --gold:#C99A3F;
+    --gold-deep:#A87E2C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Be Vietnam Pro',sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(201,154,63,0.08), transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(62,124,89,0.10), transparent 45%),
+      var(--bg);
+    color:var(--paper);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:32px 16px 60px;
+  }
+  .wrap{ width:100%; max-width:640px; }
+
+  /* header */
+  .shop-header{ text-align:center; margin-bottom:22px; }
+  .awning{
+    height:14px;
+    background:repeating-linear-gradient(90deg,var(--vermillion) 0 22px, var(--gold) 22px 44px);
+    border-radius:6px 6px 0 0;
+    margin:0 8px;
+  }
+  .shop-title{
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:clamp(26px,6vw,38px);
+    margin:14px 0 4px;
+    letter-spacing:1px;
+    color:var(--paper);
+    text-shadow:0 2px 0 rgba(0,0,0,0.35);
+  }
+  .shop-sub{
+    font-size:14px;
+    color:var(--gold);
+    font-style:italic;
+    letter-spacing:.3px;
+  }
+
+  /* progress row */
+  .progress-row{
+    display:flex; gap:8px; justify-content:center; margin:20px 0 26px;
+    flex-wrap:wrap;
+  }
+  .stage-chip{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:20px;
+    border:1px solid rgba(246,238,222,0.25);
+    color:rgba(246,238,222,0.55);
+    background:rgba(0,0,0,0.15);
+    transition:all .25s ease;
+  }
+  .stage-chip.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--bg2);
+    font-weight:700;
+  }
+  .stage-chip.done{
+    background:var(--jade);
+    border-color:var(--jade);
+    color:var(--paper);
+  }
+
+  /* the hanging note card */
+  .note-hang{ display:flex; justify-content:center; gap:210px; height:18px; margin-bottom:-2px; position:relative; z-index:2;}
+  .clip{
+    width:22px;height:22px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #d8d8d8, #8a8a8a 60%, #5a5a5a 100%);
+    box-shadow:0 3px 4px rgba(0,0,0,0.4);
+    position:relative;
+  }
+  .clip::after{
+    content:'';
+    position:absolute; left:50%; top:100%; transform:translateX(-50%);
+    width:3px; height:16px; background:#6b6b6b;
+  }
+
+  .card{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:6px;
+    padding:34px 28px 28px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.45), 0 2px 0 var(--paper-shadow) inset;
+    position:relative;
+    min-height:280px;
+    display:flex;
+    flex-direction:column;
+  }
+  .card::before{
+    content:'';
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle, rgba(0,0,0,0.035) 1px, transparent 1px);
+    background-size:10px 10px;
+    border-radius:6px;
+    pointer-events:none;
+  }
+
+  .round-label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .round-title{
+    font-family:'Noto Serif TC',serif;
+    font-weight:700;
+    font-size:20px;
+    margin:0 0 4px;
+  }
+  .round-vi{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-style:italic;
+    margin-bottom:18px;
+  }
+
+  .prompt{
+    font-family:'Noto Serif TC',serif;
+    font-size:clamp(20px,5vw,26px);
+    font-weight:700;
+    line-height:1.5;
+    margin-bottom:6px;
+  }
+  .prompt .blank{
+    display:inline-block;
+    min-width:52px;
+    border-bottom:3px solid var(--vermillion);
+    text-align:center;
+  }
+  .prompt-hint{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+  .pinyin{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+
+  .options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:auto;
+  }
+  .options.single-col{ grid-template-columns:1fr; }
+  .opt-btn{
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:13px 12px;
+    border-radius:8px;
+    border:2px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .12s ease, background .18s ease, color .18s ease;
+    text-align:left;
+    line-height:1.4;
+  }
+  .opt-btn .zh{ font-family:'Noto Serif TC',serif; font-size:17px; display:block; }
+  .opt-btn .vi{ font-size:12px; color:var(--ink-soft); font-style:italic; display:block; margin-top:2px;}
+  .opt-btn:hover:not(:disabled){ transform:translateY(-2px); background:rgba(43,32,25,0.06); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct{ background:var(--jade); border-color:var(--jade-dark); color:#fff; }
+  .opt-btn.correct .vi{ color:rgba(255,255,255,0.85); }
+  .opt-btn.wrong{ background:var(--vermillion); border-color:#7c2323; color:#fff; }
+  .opt-btn.wrong .vi{ color:rgba(255,255,255,0.85); }
+  .opt-btn.dim{ opacity:0.4; }
+
+  .feedback{
+    margin-top:14px;
+    font-size:14px;
+    font-weight:600;
+    min-height:20px;
+  }
+  .feedback.good{ color:var(--jade-dark); }
+  .feedback.bad{ color:var(--vermillion); }
+
+  .footer-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:20px;
+  }
+  .score-tag{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .score-tag b{ color:var(--gold-deep); font-size:16px;}
+  .next-btn{
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 22px;
+    border-radius:24px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    cursor:pointer;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .next-btn.show{ opacity:1; transform:translateY(0); }
+  .next-btn:hover{ background:var(--jade-dark); }
+
+  .stall-shelf{
+    height:16px;
+    margin:0 8px;
+    background:repeating-linear-gradient(45deg, #4a3626 0 10px, #3a2a1c 10px 20px);
+    border-radius:0 0 6px 6px;
+  }
+
+  /* receipt end screen */
+  .receipt{
+    background:var(--paper);
+    color:var(--ink);
+    padding:30px 26px;
+    border-radius:2px;
+    font-family:'Space Mono',monospace;
+    font-size:14px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.45);
+    position:relative;
+    clip-path:polygon(
+      0% 2%, 3% 0%, 6% 2%, 9% 0%, 12% 2%, 15% 0%, 18% 2%, 21% 0%, 24% 2%, 27% 0%, 30% 2%, 33% 0%, 36% 2%, 39% 0%, 42% 2%, 45% 0%, 48% 2%, 51% 0%, 54% 2%, 57% 0%, 60% 2%, 63% 0%, 66% 2%, 69% 0%, 72% 2%, 75% 0%, 78% 2%, 81% 0%, 84% 2%, 87% 0%, 90% 2%, 93% 0%, 96% 2%, 100% 0%,
+      100% 98%, 97% 100%, 94% 98%, 91% 100%, 88% 98%, 85% 100%, 82% 98%, 79% 100%, 76% 98%, 73% 100%, 70% 98%, 67% 100%, 64% 98%, 61% 100%, 58% 98%, 55% 100%, 52% 98%, 49% 100%, 46% 98%, 43% 100%, 40% 98%, 37% 100%, 34% 98%, 31% 100%, 28% 98%, 25% 100%, 22% 98%, 19% 100%, 16% 98%, 13% 100%, 10% 98%, 7% 100%, 4% 98%, 0% 100%
+    );
+    animation:print-out .5s ease;
+  }
+  @keyframes print-out{
+    from{ transform:translateY(-24px); opacity:0; }
+    to{ transform:translateY(0); opacity:1; }
+  }
+  .receipt h2{
+    font-family:'Noto Serif TC',serif;
+    text-align:center;
+    font-size:22px;
+    margin:0 0 2px;
+  }
+  .receipt .sub{ text-align:center; font-size:11px; color:var(--ink-soft); margin-bottom:16px;}
+  .dash{ border-top:1px dashed var(--ink-soft); margin:12px 0; }
+  .line-item{ display:flex; justify-content:space-between; margin:5px 0; font-size:13px;}
+  .line-item .name{ max-width:70%; }
+  .total-row{
+    display:flex; justify-content:space-between;
+    font-weight:700; font-size:17px; margin-top:6px;
+  }
+  .stamp{
+    display:inline-block;
+    margin:16px auto 4px;
+    border:3px solid var(--vermillion);
+    color:var(--vermillion);
+    font-family:'Noto Serif TC',serif;
+    font-weight:900;
+    font-size:20px;
+    padding:6px 18px;
+    border-radius:6px;
+    transform:rotate(-6deg);
+  }
+  .stamp-wrap{ text-align:center; }
+  .replay-btn{
+    display:block;
+    margin:22px auto 0;
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-weight:700;
+    padding:12px 26px;
+    border-radius:24px;
+    background:var(--jade);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .replay-btn:hover{ background:var(--jade-dark); }
+
+  @media (max-width:420px){
+    .note-hang{ gap:130px; }
+    .options{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="shop-header">
+    <div class="shop-title">咖啡店 x 手機店 大挑戰</div>
+    <div class="shop-sub">Thử thách gọi cà phê & mặc cả mua điện thoại · HSK 4–5</div>
+  </div>
+
+  <div class="progress-row" id="progressRow"></div>
+
+  <div class="note-hang"><div class="clip"></div><div class="clip"></div></div>
+  <div class="card" id="card"></div>
+  <div class="stall-shelf"></div>
+
+</div>
+
+<script>
+const ROUNDS = [
+  {
+    key:"liangci",
+    title:"第一關：量詞配對",
+    vi:"Vòng 1 · Chọn đúng lượng từ",
+    type:"mc",
+    questions:[
+      { prompt:"一___熱咖啡", pinyin:"yì ___ rè kāfēi", opts:["杯","支","個"], answer:"杯", vi:{"杯":"ly / cốc","支":"chiếc","個":"cái (chung)"} },
+      { prompt:"一___新手機", pinyin:"yì ___ xīn shǒujī", opts:["杯","支","種"], answer:"支", vi:{"杯":"ly / cốc","支":"chiếc","種":"loại"} },
+      { prompt:"三___弟弟", pinyin:"sān ___ dìdi", opts:["個","杯","塊"], answer:"個", vi:{"個":"người (chung)","杯":"ly / cốc","塊":"đồng (tiền)"} },
+      { prompt:"你想買哪___手機？", pinyin:"nǐ xiǎng mǎi nǎ ___ shǒujī?", opts:["種","支","杯"], answer:"種", vi:{"種":"loại","支":"chiếc","杯":"ly / cốc"} },
+      { prompt:"一___包子", pinyin:"yí ___ bāozi", opts:["個","支","種"], answer:"個", vi:{"個":"cái (chung)","支":"chiếc","種":"loại"} },
+      { prompt:"一共一百二十___", pinyin:"yígòng yìbǎi èrshí ___", opts:["塊","杯","個"], answer:"塊", vi:{"塊":"đồng (tiền)","杯":"ly / cốc","個":"cái (chung)"} }
+    ]
+  },
+  {
+    key:"price",
+    title:"第二關：猜價格",
+    vi:"Vòng 2 · Đoán giá đúng",
+    type:"price",
+    questions:[
+      { prompt:"一杯大杯熱咖啡多少錢？", pinyin:"Cà phê nóng, ly lớn — bao nhiêu tiền?", opts:["60 塊","80 塊","100 塊"], answer:"80 塊" },
+      { prompt:"一個包子多少錢？", pinyin:"Một cái bánh bao — bao nhiêu tiền?", opts:["20 塊","40 塊","60 塊"], answer:"40 塊" },
+      { prompt:"明華哥哥的舊手機，那種手機大概多少錢？", pinyin:"Điện thoại kiểu cũ (như của anh trai Minh Hoa) khoảng bao nhiêu?", opts:["3,000 多塊","8,000 多塊","15,000 多塊"], answer:"3,000 多塊" },
+      { prompt:"月美想買的新手機（能照相也能上網）多少錢？", pinyin:"Điện thoại mới, chụp ảnh + lên mạng được — bao nhiêu?", opts:["3,000 多塊","8,000 多塊","15,000 多塊"], answer:"15,000 多塊" }
+    ]
+  },
+  {
+    key:"grammar",
+    title:"第三關：句型填空",
+    vi:"Vòng 3 · Điền đúng mẫu câu",
+    type:"mc",
+    questions:[
+      { prompt:"我這支手機太___了，不好看。", pinyin:"Wǒ zhè zhī shǒujī tài ___ le, bù hǎokàn.", opts:["舊","新","便宜"], answer:"舊", vi:{"舊":"cũ","新":"mới","便宜":"rẻ"} },
+      { prompt:"那種手機很好，我哥哥有一___。", pinyin:"Nà zhǒng shǒujī hěn hǎo, wǒ gēge yǒu yì ___.", opts:["支","杯","個"], answer:"支", vi:{"支":"chiếc","杯":"ly","個":"cái"} },
+      { prompt:"這支手機能照相___能上網。", pinyin:"Zhè zhī shǒujī néng zhàoxiàng ___ néng shàngwǎng.", opts:["也","太","很"], answer:"也", vi:{"也":"cũng (…cũng…)","太":"quá","很":"rất"} },
+      { prompt:"外帶，一___多少錢？", pinyin:"Wàidài, yí ___ duōshǎo qián?", opts:["共","起","樣"], answer:"共", vi:{"共":"一共 = tổng cộng","起":"—","樣":"—"} }
+    ]
+  },
+  {
+    key:"dialogue",
+    title:"第四關：對話理解",
+    vi:"Vòng 4 · Chọn câu trả lời đúng",
+    type:"dialogue",
+    questions:[
+      { prompt:"老闆：「請問你要買什麼？」", pinyin:"Bạn (khách) sẽ trả lời gì?", opts:[
+          {zh:"一杯熱咖啡，兩個包子。", vi:"Một ly cà phê nóng, hai cái bánh bao.", correct:true},
+          {zh:"貴不貴？", vi:"Có đắt không?", correct:false},
+          {zh:"能照相也能上網。", vi:"Chụp ảnh được, lên mạng cũng được.", correct:false}
+        ]},
+      { prompt:"明華：「妳的手機很好，為什麼要買新的？」", pinyin:"月美 sẽ trả lời gì?", opts:[
+          {zh:"我這支手機太舊了，不好看。", vi:"Điện thoại này của tôi cũ quá, không đẹp.", correct:true},
+          {zh:"咖啡八十，包子四十。", vi:"Cà phê 80, bánh bao 40.", correct:false},
+          {zh:"請問外帶還是內用？", vi:"Anh/chị dùng mang đi hay tại chỗ?", correct:false}
+        ]},
+      { prompt:"月美：「一支賣多少錢？」", pinyin:"明華 sẽ trả lời gì?", opts:[
+          {zh:"一支要一萬五千多。", vi:"Một chiếc khoảng hơn 15 nghìn.", correct:true},
+          {zh:"外帶，一共多少錢？", vi:"Mang đi, tổng cộng bao nhiêu tiền?", correct:false},
+          {zh:"你要大杯還是小杯？", vi:"Bạn muốn ly lớn hay ly nhỏ?", correct:false}
+        ]}
+    ]
+  }
+];
+
+let roundIdx = 0, qIdx = 0, score = 0, total = 0;
+let roundScores = ROUNDS.map(()=>({correct:0,count:0}));
+
+const card = document.getElementById('card');
+const progressRow = document.getElementById('progressRow');
+
+function renderProgress(){
+  progressRow.innerHTML = '';
+  ROUNDS.forEach((r,i)=>{
+    const chip = document.createElement('div');
+    chip.className = 'stage-chip' + (i===roundIdx?' active':'') + (i<roundIdx?' done':'');
+    chip.textContent = (i+1) + '. ' + r.key;
+    progressRow.appendChild(chip);
+  });
+}
+
+function currentQuestion(){
+  return ROUNDS[roundIdx].questions[qIdx];
+}
+
+function renderQuestion(){
+  renderProgress();
+  const round = ROUNDS[roundIdx];
+  const q = currentQuestion();
+  total = total; // no-op
+
+  let optsHtml = '';
+  if(round.type === 'mc'){
+    optsHtml = q.opts.map(o => `
+      <button class="opt-btn" data-val="${o}">
+        <span class="zh">${o}</span>
+        <span class="vi">${q.vi && q.vi[o] ? q.vi[o] : ''}</span>
+      </button>`).join('');
+  } else if(round.type === 'price'){
+    optsHtml = q.opts.map(o => `
+      <button class="opt-btn" data-val="${o}">
+        <span class="zh">${o}</span>
+      </button>`).join('');
+  } else if(round.type === 'dialogue'){
+    optsHtml = q.opts.map(o => `
+      <button class="opt-btn" data-val="${o.correct ? '1':'0'}">
+        <span class="zh">${o.zh}</span>
+        <span class="vi">${o.vi}</span>
+      </button>`).join('');
+  }
+
+  card.innerHTML = `
+    <div class="round-label">${round.key} · ${qIdx+1} / ${round.questions.length}</div>
+    <div class="round-title">${round.title}</div>
+    <div class="round-vi">${round.vi}</div>
+    <div class="prompt">${q.prompt}</div>
+    <div class="prompt-hint">${q.pinyin || ''}</div>
+    <div class="options ${round.type==='dialogue' ? 'single-col' : ''}">${optsHtml}</div>
+    <div class="feedback" id="feedback"></div>
+    <div class="footer-row">
+      <div class="score-tag">得分 Điểm: <b>${score}</b> / ${totalQuestions()}</div>
+      <button class="next-btn" id="nextBtn">下一題 →</button>
+    </div>
+  `;
+
+  const buttons = card.querySelectorAll('.opt-btn');
+  buttons.forEach(btn=>{
+    btn.addEventListener('click', ()=> handleAnswer(btn, buttons, round, q));
+  });
+}
+
+function totalQuestions(){
+  return ROUNDS.reduce((s,r)=>s+r.questions.length,0);
+}
+
+function handleAnswer(btn, buttons, round, q){
+  buttons.forEach(b=>b.disabled = true);
+  let isCorrect = false;
+  if(round.type === 'dialogue'){
+    isCorrect = btn.dataset.val === '1';
+  } else {
+    isCorrect = btn.dataset.val === q.answer;
+  }
+
+  buttons.forEach(b=>{
+    const val = b.dataset.val;
+    let correctBtn = false;
+    if(round.type==='dialogue'){ correctBtn = val === '1'; }
+    else { correctBtn = val === q.answer; }
+    if(correctBtn){ b.classList.add('correct'); }
+    else if(b===btn){ b.classList.add('wrong'); }
+    else { b.classList.add('dim'); }
+  });
+
+  const fb = document.getElementById('feedback');
+  if(isCorrect){
+    score++;
+    roundScores[roundIdx].correct++;
+    fb.textContent = '✓ 對了！Chính xác!';
+    fb.className = 'feedback good';
+  } else {
+    fb.textContent = '✗ 再想想 — đáp án đúng đã hiện màu xanh.';
+    fb.className = 'feedback bad';
+  }
+  roundScores[roundIdx].count++;
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.add('show');
+  nextBtn.addEventListener('click', advance);
+}
+
+function advance(){
+  const round = ROUNDS[roundIdx];
+  if(qIdx < round.questions.length - 1){
+    qIdx++;
+  } else if(roundIdx < ROUNDS.length - 1){
+    roundIdx++;
+    qIdx = 0;
+  } else {
+    renderReceipt();
+    return;
+  }
+  renderQuestion();
+}
+
+function renderReceipt(){
+  progressRow.innerHTML = '';
+  ROUNDS.forEach((r,i)=>{
+    const chip = document.createElement('div');
+    chip.className = 'stage-chip done';
+    chip.textContent = (i+1) + '. ' + r.key;
+    progressRow.appendChild(chip);
+  });
+
+  const t = totalQuestions();
+  const pct = Math.round((score/t)*100);
+  let grade = '再接再厲';
+  let gradeVi = 'Cố lên thêm chút nữa!';
+  if(pct >= 90){ grade='滿分高手'; gradeVi='Xuất sắc!'; }
+  else if(pct >= 70){ grade='很不錯'; gradeVi='Khá tốt!'; }
+  else if(pct >= 50){ grade='及格'; gradeVi='Đạt yêu cầu'; }
+
+  card.innerHTML = `
+    <div class="receipt">
+      <h2>購物議價 收據</h2>
+      <div class="sub">HÓA ĐƠN THỬ THÁCH · HSK 4–5</div>
+      <div class="dash"></div>
+      ${ROUNDS.map((r,i)=>`
+        <div class="line-item">
+          <span class="name">${i+1}. ${r.title}</span>
+          <span>${roundScores[i].correct}/${roundScores[i].count}</span>
+        </div>
+      `).join('')}
+      <div class="dash"></div>
+      <div class="total-row"><span>總分 TỔNG</span><span>${score} / ${t}</span></div>
+      <div class="stamp-wrap"><div class="stamp">${grade}</div></div>
+      <div class="sub" style="margin-top:6px;">${gradeVi} · ${pct}%</div>
+    </div>
+    <button class="replay-btn" id="replayBtn">🔄 再玩一次 Chơi lại</button>
+  `;
+  document.getElementById('replayBtn').addEventListener('click', restart);
+}
+
+function restart(){
+  roundIdx = 0; qIdx = 0; score = 0;
+  roundScores = ROUNDS.map(()=>({correct:0,count:0}));
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
